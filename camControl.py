@@ -53,6 +53,13 @@ class CamControl(DirectObject):
 		self.controlMap[key] = val
 
 
+	def getX(self):
+		return base.cam.getX()
+
+	def getY(self):
+		return base.cam.getY()
+
+
 
 	def mouseListenerTask(self, task):
 		mw = base.mouseWatcherNode
@@ -92,7 +99,7 @@ class CamControl(DirectObject):
 		x_delta = self.sideSpeed * globalClock.get_dt()
 
 		base.cam.setPos(base.cam, x_delta, y_delta, 0)
-		base.cam.setZ(0)
+		base.cam.setZ(60)
 		
 		#currentY = base.cam.getY()
 		#base.cam.setY(currentY +y_delta)

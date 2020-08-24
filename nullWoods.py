@@ -5,11 +5,14 @@ from panda3d.core import Camera
 from panda3d.core import OrthographicLens
 from panda3d.core import Fog
 from direct.task import Task
+from pandac.PandaModules import *
+
 from trees.tree import Tree
 from trees.noiseTree import NoiseTree
 from trees.noisePosTree import NoisePosTree
 from camControl import CamControl
-from pandac.PandaModules import *
+from map.map import MapTreeGen
+
 import types
 import sys
 import pdb
@@ -30,33 +33,37 @@ class ForestApp(ShowBase):
 		base.camLens.setFar(2000)
 		base.setBackgroundColor(255,255,255)
 
-		base.cam.setPos(0, -200, 0)
+		base.cam.setPos(0, -200, 80)
 
 
 		myFog = Fog("Fog Name")
 		myFog.setMode(Fog.MExponentialSquared)
 		myFog.setColor(255,255, 255)
-		myFog.setExpDensity(0.0013)
+		myFog.setExpDensity(0.001)
 		self.render.setFog(myFog)
 
 		camControl = CamControl(self)
+
+
+		mapGen = MapTreeGen(80, 80, 2500, 6000, camControl)
+		mapGen.start()
 		
 
-		cols, rows = 10, 100
+		"""cols, rows = 10, 100
 		self.trees = []
 
 		for col in range(cols):
 			for row in range(rows):
-				tree = Tree((col*300 - 450, row*200 - 1000, -80))
+				tree = Tree((col*300 - 450, row*200 - 1000, 0))
 				treeNP = tree.create()
 				tree.draw()
 				treeNP.reparentTo(self.render)
-				self.trees.append(tree)
+				self.trees.append(tree)"""
 
-		self.tree = NoisePosTree((0, 300, -80))
-		self.tree.create().reparentTo(render)
+		#self.tree = NoisePosTree((0, 300, 0))
+		#self.tree.create().reparentTo(render)
 
-		base.taskMgr.add(self.updateTrees, "updateTreesTask")
+		#base.taskMgr.add(self.updateTrees, "updateTreesTask")
 		#base.taskMgr.add(self.dolly, "dollyTask")
 
 

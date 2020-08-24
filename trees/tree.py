@@ -1,22 +1,35 @@
 import math
+from direct.showbase.ShowBase import ShowBase
 from panda3d.core import LineSegs
 from panda3d.core import GeomNode
 from panda3d.core import NodePath
 from opensimplex import OpenSimplex
+from map.clearing import ClearingCircle
 import random
 
 class Tree:
 
-	def __init__(self, origin):
+	def __init__(self, origin, clearingR):
 		self.branchCount = 0
-		self.origin = origin
+		self.position = origin
+		self.clearing = ClearingCircle(self.position[0], self.position[1], clearingR)
 		self.angleMode = 'random'
 		self.lengthScale = -1 # set to -1 for randomized scales
 		self.minLength = 10
-		self.treeSource = self.branch(100, 0, 0)
 		self.noise = OpenSimplex()
 		self.lineSegs = []
-		#self.geomNode = GeomNode('tree node')
+
+		self.treeSource = self.branch(100, 0, 0)
+
+
+	def getX(self):
+		return self.position[0]
+
+	def getY(self):
+		return self.position[1]
+
+	def getZ(self):
+		return self.position[2]
 
 
 
@@ -88,19 +101,33 @@ class Tree:
 
 
 
-	def create(self, info = None):
+	def create(self):
 		self.geomNode = GeomNode('tree node')
-		#self.draw(info)
+		self.update()
 		return NodePath(self.geomNode)
 
 
-	def draw(self, info = None):
+	def update(self, info = None):
 		self.geomNode.removeAllGeoms()
 
-		self.drawBranch(self.treeSource, self.origin, info)
+		self.drawBranch(self.treeSource, (0,0,0), info)
 
 		for lineSeg in self.lineSegs:
 			lineSeg.create(self.geomNode, True)
+
+		#TODO: checar bien que onda con esto
+		self.clearing.x = self.position[0]
+		self.clearing.y = self.position[1]
+
+
+	def load(self):
+		self.nodePath = self.create()
+		self.nodePath.reparentTo(render)
+		self.nodePath.setPos(self.position)
+
+	def cleanup(self):
+		self.nodePath.removeNode()
+		self.nodePath = None
 
 
 
