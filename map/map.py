@@ -30,6 +30,12 @@ class MapTreeGen:
 		self.anchor = anchor
 
 		self.trees = []
+		self.treeReserve = []
+
+
+	def fillReserve(self, n):
+		for i in range(n):
+			self.treeReserve.append(Tree())
 
 
 	def start(self):
@@ -38,8 +44,8 @@ class MapTreeGen:
 
 
 	def genTree(self, Task):
-		#Pick a random point in loading zone and generate a tree if possible
-		for _ in range(1):
+		for _ in range(10):
+			# Pick a random point inside the loading zone, using gaussian disribution for radius to spawn trees near the player more frequently
 			theta = uniform(0, 2*math.pi)
 			r = gauss(self.visionRadius, (self.laodingRadus - self.visionRadius)/3.5)
 			r = r if r > self.visionRadius else self.visionRadius + (self.visionRadius - r)
@@ -50,6 +56,7 @@ class MapTreeGen:
 			valid = True
 			maxPosibleRadius = self.maxRadius
 	
+			# Check weather its possible to spawn a tree in
 			for clearing in Map.clearings:
 				r = clearing.maxRadiusForCircleAt(x,y)
 				if r < self.minRadius:
@@ -58,12 +65,18 @@ class MapTreeGen:
 				else:
 					maxPosibleRadius = min(maxPosibleRadius, r)
 	
+			# Spawn tree
 			if valid:
-				r = maxPosibleRadius #uniform(self.minRadius, maxPosibleRadius)
-				tree = Tree((x,y,0), r)
-				Map.registerClearing(tree.clearing)
-				tree.load()
-				self.trees.append(tree)
+				if len(self.treeReserve) > 0:
+					r = maxPosibleRadius 
+					tree = self.treeReserve.pop() #Tree((x,y,0), r)
+					tree.setPosition(x,y,0)
+					tree.setClearingRadius(r)
+					Map.registerClearing(tree.clearing)
+					tree.load()
+					self.trees.append(tree)
+				else:
+					print("Empty tree reserve for map generation")
 
 		return Task.cont
 
@@ -74,8 +87,9 @@ class MapTreeGen:
 		for tree in self.trees:
 			if dist(self.anchor.getX(), self.anchor.getY(), tree.getX(), tree.getY()) > self.laodingRadus:
 				Map.unregisterClearing(tree.clearing)
-				tree.cleanup()
+				tree.unload()
 				self.trees.remove(tree)
+				self.treeReserve.insert(0, tree)
 
 		return Task.cont
 

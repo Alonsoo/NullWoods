@@ -9,27 +9,43 @@ import random
 
 class Tree:
 
-	def __init__(self, origin, clearingR):
+	def __init__(self, origin = None):
 		self.branchCount = 0
-		self.position = origin
-		self.clearing = ClearingCircle(self.position[0], self.position[1], clearingR)
-		self.angleMode = 'random'
-		self.lengthScale = -1 # set to -1 for randomized scales
+		#self.position = origin
+		self.clearing = None #ClearingCircle(self.position[0], self.position[1], clearingR)
 		self.minLength = 10
 		self.noise = OpenSimplex()
 		self.lineSegs = []
 
 		self.treeSource = self.branch(100, 0, 0)
+		self.nodePath = self.create()
+
+		if origin != None:
+			self.setPosition(origin[0], origin[1], origin[2])
+
+
+	def setClearingRadius(self, r):
+		if self.clearing == None:
+			self.clearing = ClearingCircle(self.getX(), self.getY(), r)
+		else:
+			self.clearing.r = r
+
+	def setPosition(self, x, y, z):
+		self.nodePath.setPos(x,y,z)
+		#self.position = pos
+		if self.clearing != None:
+			self.clearing.x = self.getX()
+			self.clearing.y = self.getY()
 
 
 	def getX(self):
-		return self.position[0]
+		return self.nodePath.getX() #self.position[0]
 
 	def getY(self):
-		return self.position[1]
+		return self.nodePath.getY() #self.position[1]
 
 	def getZ(self):
-		return self.position[2]
+		return self.nodePath.getZ() #self.position[2]
 
 
 
@@ -43,16 +59,12 @@ class Tree:
 			newTheta = 0.0
 			newphi = 0.0
 			newLength = 0.0
-	
-			if self.angleMode == 'random':
-				newTheta = random.uniform(0, 2*math.pi)
-				newPhi = random.gauss(math.pi/4, 0.4) #random.uniform(0, math.pi/2)
-	
-			if self.lengthScale == -1:
-				newLength = length * min(random.gauss(0.75, 0.1), 0.95)
-			else:
-				newLength = length * self.lengthScale
 
+			newTheta = random.uniform(0, 2*math.pi)
+			newPhi = random.gauss(math.pi/4, 0.4) #random.uniform(0, math.pi/2)
+	
+			newLength = length * min(random.gauss(0.75, 0.1), 0.95)
+	
 			branches.append(self.branch(newLength, newTheta, newPhi, depth + 1))
 
 
@@ -67,14 +79,13 @@ class Tree:
 
 		if len(self.lineSegs) <= branch.depth:
 			lineSeg = LineSegs('')
-			lineSeg.setThickness(branch.length / 10) # make depth dependent instead of branch length dependent?
+			lineSeg.setThickness(branch.length / 10) # make depth dependent instead of branch length dependent
 			self.lineSegs.append(lineSeg)
 
 
-		line = self.lineSegs[branch.depth] #LineSegs('')
+		line = self.lineSegs[branch.depth]
 		color = Tree.map(branch.length, 100, 0, 0, .45)
 		line.setColor(color, color, color)
-		#line.setThickness(branch.length / 10)
 
 		x1, y1, z1 = origin
 
@@ -89,7 +100,6 @@ class Tree:
 
 		line.moveTo(x1, y1, z1)
 		line.drawTo(x2, y2, z2)
-		#line.create(self.geomNode, True)
 
 		for child in branch.children:
 			if child != None:
@@ -115,20 +125,16 @@ class Tree:
 		for lineSeg in self.lineSegs:
 			lineSeg.create(self.geomNode, True)
 
-		#TODO: checar bien que onda con esto
-		self.clearing.x = self.position[0]
-		self.clearing.y = self.position[1]
-
-
 	def load(self):
-		self.nodePath = self.create()
 		self.nodePath.reparentTo(render)
-		self.nodePath.setPos(self.position)
+
+	def unload(self):
+		self.nodePath.detachNode()
+
 
 	def cleanup(self):
 		self.nodePath.removeNode()
 		self.nodePath = None
-
 
 
 

@@ -46,6 +46,7 @@ class ForestApp(ShowBase):
 
 
 		mapGen = MapTreeGen(80, 80, 2500, 6000, camControl)
+		mapGen.fillReserve(1800)
 		mapGen.start()
 		
 
