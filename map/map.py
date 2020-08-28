@@ -44,7 +44,18 @@ class MapTreeGen:
 
 
 	def genTree(self, Task):
-		for _ in range(10):
+
+
+		#Check which clearings are inside loading zone
+		clearingsInLoadingZone = []
+		for clearing in Map.clearings:
+			if dist(self.anchor.getX(), self.anchor.getY(), clearing.x, clearing.y) + clearing.r >= self.visionRadius:
+				clearingsInLoadingZone.append(clearing)
+
+
+		#print('{}, {}'.format(len(Map.clearings), len(clearingsInLoadingZone)))
+
+		for _ in range(3):
 			# Pick a random point inside the loading zone, using gaussian disribution for radius to spawn trees near the player more frequently
 			theta = uniform(0, 2*math.pi)
 			r = gauss(self.visionRadius, (self.laodingRadus - self.visionRadius)/3.5)
@@ -57,7 +68,7 @@ class MapTreeGen:
 			maxPosibleRadius = self.maxRadius
 	
 			# Check weather its possible to spawn a tree in
-			for clearing in Map.clearings:
+			for clearing in clearingsInLoadingZone:
 				r = clearing.maxRadiusForCircleAt(x,y)
 				if r < self.minRadius:
 					valid = False

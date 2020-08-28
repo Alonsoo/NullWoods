@@ -45,8 +45,8 @@ class ForestApp(ShowBase):
 		camControl = CamControl(self)
 
 
-		mapGen = MapTreeGen(80, 80, 2500, 6000, camControl)
-		mapGen.fillReserve(1800)
+		mapGen = MapTreeGen(100, 100, 2500, 3000, camControl)
+		mapGen.fillReserve(700)
 		mapGen.start()
 		
 

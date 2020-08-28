@@ -11,9 +11,9 @@ class Tree:
 
 	def __init__(self, origin = None):
 		self.branchCount = 0
-		#self.position = origin
-		self.clearing = None #ClearingCircle(self.position[0], self.position[1], clearingR)
+		self.clearing = None
 		self.minLength = 10
+		self.maxDepth = 9
 		self.noise = OpenSimplex()
 		self.lineSegs = []
 
@@ -50,7 +50,7 @@ class Tree:
 
 
 	def branch(self, length, theta, phi, depth = 0):
-		if length < self.minLength:
+		if depth > self.maxDepth: #length < self.minLength:
 			return None
 
 		branches = []
@@ -124,6 +124,7 @@ class Tree:
 
 		for lineSeg in self.lineSegs:
 			lineSeg.create(self.geomNode, True)
+
 
 	def load(self):
 		self.nodePath.reparentTo(render)
