@@ -12,13 +12,15 @@ class Tree:
 	def __init__(self, origin = None):
 		self.branchCount = 0
 		self.clearing = None
-		self.minLength = 10
 		self.maxDepth = 9
-		self.noise = OpenSimplex()
+		#self.noise = OpenSimplex()
 		self.lineSegs = []
 
 		self.treeSource = self.branch(100, 0, 0)
-		self.nodePath = self.create()
+		self.geomNode = GeomNode('tree node')
+		self.nodePath = NodePath(self.geomNode)
+
+		self.draw()
 
 		if origin != None:
 			self.setPosition(origin[0], origin[1], origin[2])
@@ -110,20 +112,16 @@ class Tree:
 		return (branch.phi, branch.theta)
 
 
-
-	def create(self):
-		self.geomNode = GeomNode('tree node')
-		self.update()
-		return NodePath(self.geomNode)
-
-
-	def update(self, info = None):
+	def draw(self, info = None):
 		self.geomNode.removeAllGeoms()
 
 		self.drawBranch(self.treeSource, (0,0,0), info)
 
 		for lineSeg in self.lineSegs:
 			lineSeg.create(self.geomNode, True)
+
+	def update(self, info):
+		self.draw(info)
 
 
 	def load(self):
