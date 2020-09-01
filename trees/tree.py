@@ -3,20 +3,18 @@ from direct.showbase.ShowBase import ShowBase
 from panda3d.core import LineSegs
 from panda3d.core import GeomNode
 from panda3d.core import NodePath
-from opensimplex import OpenSimplex
 from map.clearing import ClearingCircle
 import random
 
 class Tree:
 
-	def __init__(self, origin = None):
+	def __init__(self, origin = None, size = 100):
 		self.branchCount = 0
 		self.clearing = None
-		self.maxDepth = 9
-		#self.noise = OpenSimplex()
+		self.maxDepth = 7
 		self.lineSegs = []
 
-		self.treeSource = self.branch(100, 0, 0)
+		self.treeSource = self.branch(size, 0, 0)
 		self.geomNode = GeomNode('tree node')
 		self.nodePath = NodePath(self.geomNode)
 
@@ -108,12 +106,13 @@ class Tree:
 				self.drawBranch(child, dest, info)
 
 
-	def getBranchAngles(self, branch, info):
+	def getBranchAngles(self, branch, info = None):
 		return (branch.phi, branch.theta)
 
 
 	def draw(self, info = None):
 		self.geomNode.removeAllGeoms()
+		self.lineSegs = []
 
 		self.drawBranch(self.treeSource, (0,0,0), info)
 
@@ -126,6 +125,9 @@ class Tree:
 
 	def load(self):
 		self.nodePath.reparentTo(render)
+
+	def loadInto(self, node):
+		self.nodePath.reparentTo(node)
 
 	def unload(self):
 		self.nodePath.detachNode()

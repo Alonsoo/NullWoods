@@ -59,6 +59,9 @@ class CamControl(DirectObject):
 	def getY(self):
 		return base.cam.getY()
 
+	def getNode(self):
+		return base.cam
+
 
 
 	def mouseListenerTask(self, task):

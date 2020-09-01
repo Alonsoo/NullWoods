@@ -1,18 +1,78 @@
 import math
+from enum import Enum
 from random import uniform, gauss
 from direct.task import Task
 
+import util
 from trees.tree import Tree
+from map.location import NoiseTreeSpot
 
 class Map:
 
+	class State(Enum):
+		traveling = 0
+		visiting = 1
+
 	clearings = []
+	locations = []
+	currentLocation = None
+	state = State.traveling
+
+	visionDistance = 2500
+	loadingDistance = 3200
+
+
+	def init():
+		Map.locations.append(NoiseTreeSpot())
+		Map.locations[0].setPos(0, 6000, 0)
+		Map.locations[0].build()
+		Map.locations[0].load()
+		Map.currentLocation = Map.locations[0]
+
+		Map.registerClearing(Map.currentLocation.clearing)
 
 	def registerClearing(clearing):
 		Map.clearings.append(clearing)
 
 	def unregisterClearing(clearing):
 		Map.clearings.remove(clearing)
+
+
+	def update(info):
+		Map.currentLocation.update(info)
+		player = info['player']
+
+
+		distToLoc = util.distObj(player, Map.currentLocation)
+
+
+		if Map.state == Map.State.visiting:
+			
+			if distToLoc > Map.visionDistance + Map.currentLocation.clearing.r:
+				Map.currentLocation.unload()
+				Map.unregisterClearing(Map.currentLocation.clearing)
+
+				#Move to next location
+				Map.currentLocation.load()
+				Map.currentLocation.setPos(0, Map.currentLocation.spawnDistance, 0, player.getNode())
+				Map.registerClearing(Map.currentLocation.clearing)
+				Map.state = Map.State.traveling
+				print('now traveling')
+
+		elif Map.state == Map.State.traveling:
+			if distToLoc > Map.loadingDistance + Map.currentLocation.clearing.r:
+				Map.currentLocation.setPos(0, distToLoc, 0, player.getNode())
+
+			if distToLoc < Map.currentLocation.clearing.r:
+				Map.state = Map.State.visiting
+				print('now visiting')
+
+
+		else:
+			print(Map.state)
+
+
+
 
 
 
@@ -49,9 +109,8 @@ class MapTreeGen:
 		#Check which clearings are inside loading zone
 		clearingsInLoadingZone = []
 		for clearing in Map.clearings:
-			if dist(self.anchor.getX(), self.anchor.getY(), clearing.x, clearing.y) + clearing.r >= self.visionRadius:
+			if util.dist(self.anchor.getX(), self.anchor.getY(), clearing.x, clearing.y) + clearing.r >= self.visionRadius:
 				clearingsInLoadingZone.append(clearing)
-
 
 		#print('{}, {}'.format(len(Map.clearings), len(clearingsInLoadingZone)))
 
@@ -68,7 +127,7 @@ class MapTreeGen:
 			maxPosibleRadius = self.maxRadius
 	
 			# Check weather its possible to spawn a tree in
-			for clearing in clearingsInLoadingZone:
+			for clearing in Map.clearings: #clearingsInLoadingZone:
 				r = clearing.maxRadiusForCircleAt(x,y)
 				if r < self.minRadius:
 					valid = False
@@ -96,7 +155,7 @@ class MapTreeGen:
 	def purge(self, task):
 		#Remove trees outside loading zone
 		for tree in self.trees:
-			if dist(self.anchor.getX(), self.anchor.getY(), tree.getX(), tree.getY()) > self.laodingRadus:
+			if util.dist(self.anchor.getX(), self.anchor.getY(), tree.getX(), tree.getY()) > self.laodingRadus:
 				Map.unregisterClearing(tree.clearing)
 				tree.unload()
 				self.trees.remove(tree)
@@ -104,7 +163,4 @@ class MapTreeGen:
 
 		return Task.cont
 
-
-def dist(x1, y1, x2, y2):
-    return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 

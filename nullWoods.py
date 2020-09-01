@@ -11,6 +11,7 @@ from trees.tree import Tree
 from trees.noiseTree import NoiseTree
 from trees.noisePosTree import NoisePosTree
 from camControl import CamControl
+from map.map import Map
 from map.map import MapTreeGen
 
 import types
@@ -33,7 +34,7 @@ class ForestApp(ShowBase):
 		base.camLens.setFar(2000)
 		base.setBackgroundColor(255,255,255)
 
-		base.cam.setPos(0, -200, 80)
+		base.cam.setPos(0, 0, 80)
 
 
 		myFog = Fog("Fog Name")
@@ -42,12 +43,15 @@ class ForestApp(ShowBase):
 		myFog.setExpDensity(0.001)
 		self.render.setFog(myFog)
 
-		camControl = CamControl(self)
+		self.camControl = CamControl(self)
 
+		Map.init()
 
-		mapGen = MapTreeGen(100, 100, 2500, 3000, camControl)
+		mapGen = MapTreeGen(100, 100, 2500, 3000, self.camControl)
 		mapGen.fillReserve(700)
 		mapGen.start()
+
+		base.taskMgr.add(self.updateMap, "mapUpdateTask")
 		
 
 		"""cols, rows = 10, 100
@@ -66,6 +70,12 @@ class ForestApp(ShowBase):
 
 		#base.taskMgr.add(self.updateTrees, "updateTreesTask")
 		#base.taskMgr.add(self.dolly, "dollyTask")
+
+	def updateMap(self, task):
+		info = {'t': task.time,
+				'player': self.camControl}
+		Map.update(info)
+		return Task.cont
 
 
 	def updateTrees(self, task):

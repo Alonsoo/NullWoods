@@ -1,4 +1,5 @@
 import math
+import util
 
 class ClearingCircle:
     def __init__(self, x, y, r):
@@ -7,11 +8,15 @@ class ClearingCircle:
         self.r = r
     
     def maxRadiusForCircleAt(self, x, y):
-        d = dist(self.x, self.y, x, y)
+        d = util.dist(self.x, self.y, x, y)
         return max(-1, d - self.r)
     
     def drawBounds(self):
         pass
+
+    def setPos(self, x, y):
+        self.x = x
+        self.y = y
 
 
     
@@ -31,7 +36,3 @@ class ClearingRect:
     
     def drawBounds(self):
         pass
-
-
-def dist(x1, y1, x2, y2):
-    return math.sqrt((x1-x2)**2 + (y1-y2)**2)
